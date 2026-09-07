@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "0 3 * * *"
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,3 +26,28 @@ jobs:
       - run: pytest tests/ --html=report.html --self-contained-html
         env:
           GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+
+      - name: Prepare report for Pages
+        if: always()
+        run: |
+          mkdir -p public
+          cp report.html public/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: public
+
+  deploy:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
