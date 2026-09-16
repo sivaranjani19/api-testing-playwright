@@ -1,7 +1,6 @@
 import pytest
-from faker import Faker
-fake = Faker()
 from jsonschema import validate
+from tests.factories import build_user_payload
 user_schema = {
     "type": "object",
     "properties": {
@@ -13,14 +12,7 @@ user_schema = {
     },
     "required": ["id", "name", "email", "gender", "status"]   # which keys must be present?
 }
-def build_user_payload():
-  create_payload = {
-      "name" : "Siva",
-      "email" : fake.email(),
-      "gender" : "Female",
-      "status" : "active"
-  }
-  return create_payload
+
 def test_user_lifecycle(api_request_context):
   #--- Create ---
   create_payload = build_user_payload()
